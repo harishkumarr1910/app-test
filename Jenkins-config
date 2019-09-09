@@ -33,7 +33,7 @@ pipeline {
 		stage ('Code Build and Triggers') {
                     steps {
 
-                    	#slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}] for ${params.ModuleName}' (${env.BUILD_URL})")
+                    	
 
                         deleteDir()
                         git branch: 'develop',
@@ -127,7 +127,7 @@ pipeline {
                                         }else{
                              			    sh "mvn -pl ${params.ModuleName}/airflow  -am deploy"
                                         }
-                             		    #slackSend (color: '#00FFFF', message: "Pre-release ${params.ModuleName} ${releaseVersion} to Dev Composer. Please Verify. (${env.BUILD_URL})")
+                             		    
 
 
                              		}
@@ -136,13 +136,7 @@ pipeline {
                         }
                     }
                     }
-                    post {
-
-                        failure {
-                        		slackSend (color: '#FF0000', message: "Build Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}] for ${params.ModuleName}  ${releaseVersion} ' (${env.BUILD_URL})")
-
-                        }
-                    }
+                    
                 }
         stage ('Move to Production') {
                     when{
@@ -156,7 +150,7 @@ pipeline {
                         }
                     }
                 	steps {
-                		 #slackSend (color: '#FFFF00', message: "Promote '${params.ModuleName} to Prod Composer by TODO:USER_NAME' (${env.BUILD_URL})")
+                		 
 
 
                 		 withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
