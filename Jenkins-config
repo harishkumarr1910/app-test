@@ -19,6 +19,8 @@ pipeline {
             def developmentVersion = ""
             def artifactPath = ""
             def isHotfix=false
+            GOOGLE_PROJECT_ID = 'dev-env-251011';
+            GOOGLE_APP_CREDENTIALS = credentials('GOOGLE_APP_CREDENTIALS');
     }
     stages {
 		stage ('Environment-Setup') {
@@ -39,10 +41,25 @@ pipeline {
                         git branch: 'develop',
                                    credentialsId: 'github_credentials',
                                    url: 'https://github.com/harishkumarr1910/app-test.git'
+
                     	configFileProvider([configFile(fileId: 'd891379d-3a32-4181-bea0-2f8a6a50079e', variable: 'MAVEN_SETTINGS')]) {
 
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
-                            sh "gcloud auth activate-service-account --key-file=${GOOGLE_APP_CREDENTIALS}"
+                         sh """
+                                                				echo "deploy stage";
+                                                				curl -o /tmp/google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-220.0.0-linux-x86_64.tar.gz;
+                                                				tar -xvf /tmp/google-cloud-sdk.tar.gz -C /tmp/;
+                                                				/tmp/google-cloud-sdk/install.sh -q;
+                                                				source /tmp/google-cloud-sdk/path.bash.inc;
+                                                				 gcloud config set project ${GOOGLE_PROJECT_ID};
+                                                				 gcloud components install app-engine-java;
+                                                				 gcloud components install app-engine-python;
+                                                				 gcloud auth activate-service-account --key-file ${GOOGLE_APP_CREDENTIALS};
+                                                				 echo "After authentication gcloud";
+                                                				 gcloud config list;
+                                                				 mvn -X clean package appengine:deploy -Dmaven.test.failure.ignore=true;
+                                                			"""
+                           
                             sh "gcloud config set project dev-env-251011"
                             sh "gcloud -q components update --version 230.0.0"
 
