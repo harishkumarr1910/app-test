@@ -33,12 +33,12 @@ pipeline {
 		stage ('Code Build and Triggers') {
                     steps {
 
-                    	
+
 
                         deleteDir()
                         git branch: 'develop',
                                    credentialsId: 'github_credentials',
-                                   url: 'git@github.com:harishkumarr1910/app-test.git'
+                                   url: 'https://github.com/harishkumarr1910/app-test.git'
                     	configFileProvider([configFile(fileId: '4738199e-c015-45a4-bcdd-a3bd9fa686c4', variable: 'MAVEN_SETTINGS')]) {
 
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
@@ -49,7 +49,7 @@ pipeline {
                              script {
                                     if(params.HotfixBranch?.trim().length() > 0 ){
                                         println("==== HOTFIX ====")
-                                        checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "git@github.com:harishkumarr1910/app-test.git", credentialsId: "github_credentials"]], branches: [[name: "${params.HotfixBranch}"]]],poll: false
+                                        checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "https://github.com/harishkumarr1910/app-test.git", credentialsId: "github_credentials"]], branches: [[name: "${params.HotfixBranch}"]]],poll: false
                                     }
 
                              		// module specific version, for tagging perpose only, we should still rely on default versioning stretgey of release plugin.
@@ -113,7 +113,7 @@ pipeline {
               							sshagent(['github_credentials']) {
                                  			sh "mvn  -B release:prepare -Dtag=${releaseTag}  -Darguments='-Dlocal=true -Dpr-build=true' -DupdateDependencie=true"
                                  		}
-                                 		checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "git@github.com:harishkumarr1910/app-test.git", credentialsId: "github_credentials"]], branches: [[name: "${releaseTag}"]]],poll: false
+                                 		checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "https://github.com/harishkumarr1910/app-test.git", credentialsId: "github_credentials"]], branches: [[name: "${releaseTag}"]]],poll: false
 
                                     }
 
@@ -127,7 +127,7 @@ pipeline {
                                         }else{
                              			    sh "mvn -pl ${params.ModuleName}/airflow  -am deploy"
                                         }
-                             		    
+
 
 
                              		}
@@ -136,7 +136,7 @@ pipeline {
                         }
                     }
                     }
-                    
+
                 }
         stage ('Move to Production') {
                     when{
@@ -150,7 +150,7 @@ pipeline {
                         }
                     }
                 	steps {
-                		 
+
 
 
                 		 withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
