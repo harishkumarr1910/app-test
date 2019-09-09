@@ -1,2 +1,2 @@
 # app-test 
-Testing app in Jenkins
+Testing app in Jenkins with new config
