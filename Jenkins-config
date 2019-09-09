@@ -39,11 +39,11 @@ pipeline {
                         git branch: 'develop',
                                    credentialsId: 'github_credentials',
                                    url: 'https://github.com/harishkumarr1910/app-test.git'
-                    	configFileProvider([configFile(fileId: '4738199e-c015-45a4-bcdd-a3bd9fa686c4', variable: 'MAVEN_SETTINGS')]) {
+                    	configFileProvider([configFile(fileId: 'd891379d-3a32-4181-bea0-2f8a6a50079e', variable: 'MAVEN_SETTINGS')]) {
 
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
                             sh "gcloud auth activate-service-account --key-file=${GOOGLE_APP_CREDENTIALS}"
-                            sh "gcloud config set project cicd"
+                            sh "gcloud config set project dev-env-251011"
                             sh "gcloud -q components update --version 230.0.0"
 
                              script {
