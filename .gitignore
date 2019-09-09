@@ -1,0 +1,8 @@
+.classpath
+.project
+*.iml
+**/.DS_Store
+**/target
+.settings
+.idea
+*.pyc
