@@ -1,0 +1,14 @@
+######### Pipeline Specific Configuration ############
+
+# data source provider
+data_provider: test
+# source of the pipeline
+data_source: api
+# owner group
+owner_team: data-team
+
+group_id: @project.parent.groupId@
+artfiact_id: @project.artifactId@
+version: @project.version@
+
+
