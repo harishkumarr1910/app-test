@@ -46,12 +46,10 @@ pipeline {
                     	configFileProvider([configFile(fileId: 'd891379d-3a32-4181-bea0-2f8a6a50079e', variable: 'MAVEN_SETTINGS')]) {
 
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
-                      withEnv(['GCLOUD_PATH=/var/jenkins_home/google-cloud-sdk/bin']) {
-		      sh """ echo '*************************************************'"""
-                sh '$GCLOUD_PATH/gcloud --version'
-            }
+                      
 			 sh """
-                                                				echo "deploy stage";
+                                                				ls /var/jenkins_home/
+										echo "deploy stage";
                                                 				curl -o /tmp/google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-220.0.0-linux-x86_64.tar.gz;
                                                 				tar -xvf /tmp/google-cloud-sdk.tar.gz -C /tmp/;
                                                 				/tmp/google-cloud-sdk/install.sh -q;
