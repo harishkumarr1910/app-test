@@ -1,6 +1,6 @@
 pipeline {
     agent{ 
-    	docker { image 'guigo2k/jenkins-k8s-slave' }
+    	label 'jenkins-slave'
     }
     options {
         skipStagesAfterUnstable()
