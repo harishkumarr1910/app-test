@@ -1,5 +1,5 @@
 pipeline {
-   agent {
+  agent {
     kubernetes {
       //cloud 'kubernetes'
       label 'mypod'
@@ -21,31 +21,9 @@ spec:
       path: /var/run/docker.sock
 """
     }
-    options {
-        skipStagesAfterUnstable()
-    }
-	tools {
-        maven 'mvn3'
-        jdk 'JDK8'
-
-    }
-	environment {
-            def majorVersion = ""
-            def minorVersion = ""
-            def incrementalVersion = ""
-            def nextIncrementalVersion = ""
-            def groupId = ""
-            def artifactId = ""
-            def releaseVersion = ""
-            def releaseTag = ""
-            def developmentVersion = ""
-            def artifactPath = ""
-            def isHotfix=false
-            GOOGLE_PROJECT_ID = 'dev-env-251011';
-            GOOGLE_APP_CREDENTIALS = credentials('GOOGLE_APP_CREDENTIALS');
-    }
-    stages {
-		stage('Build Docker image') {
+  }
+  stages {
+    stage('Build Docker image') {
       steps {
         git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
         container('docker') {
@@ -56,158 +34,7 @@ spec:
             }
           }
         }
-	}
-}
-stage ('Environment-Setup') {
-            steps {
-                sh '''
-                    echo "PATH = ${PATH}"
-                    echo "M2_HOME = ${M2_HOME}"
-		   
-                '''
-            }
-        }
-
-		stage ('Code Build and Triggers') {
-                    steps {
-
-
-
-                        deleteDir()
-                        git branch: 'develop',
-                                   credentialsId: 'github_credentials',
-                                   url: 'https://github.com/harishkumarr1910/app-test.git'
-
-                    	configFileProvider([configFile(fileId: 'd891379d-3a32-4181-bea0-2f8a6a50079e', variable: 'MAVEN_SETTINGS')]) {
-
-                        withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
-                      
-		
-                            
-			    sh "gcloud auth activate-service-account --key-file ${GOOGLE_APP_CREDENTIALS}"
-			    sh "gcloud config set project dev-env-251011"
-                            echo "After authentication gcloud";
-                            sh "gcloud -q components update --version 230.0.0"
-
-                             script {
-                                    if(params.HotfixBranch?.trim().length() > 0 ){
-                                        println("==== HOTFIX ====")
-                                        checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "https://github.com/harishkumarr1910/app-test.git", credentialsId: "github_credentials"]], branches: [[name: "${params.HotfixBranch}"]]],poll: false
-                                    }
-
-                             		// module specific version, for tagging perpose only, we should still rely on default versioning stretgey of release plugin.
-                             		majorVersion = sh (
-            								script: "echo `mvn   -pl ${params.ModuleName}  build-helper:parse-version help:evaluate -Dexpression=parsedVersion.majorVersion -q -DforceStdout`",
-            								returnStdout: true,
-          							)
-                             		minorVersion = sh (
-            								script: "echo `mvn   -pl ${params.ModuleName}  build-helper:parse-version help:evaluate -Dexpression=parsedVersion.minorVersion -q -DforceStdout`",
-            								returnStdout: true,
-          							)
-                             		incrementalVersion = sh (
-            								script: "echo `mvn   -pl ${params.ModuleName}  build-helper:parse-version help:evaluate -Dexpression=parsedVersion.incrementalVersion -q -DforceStdout`",
-            								returnStdout: true,
-          							)
-                             		nextIncrementalVersion = sh (
-            								script: "echo `mvn   -pl ${params.ModuleName}  build-helper:parse-version help:evaluate -Dexpression=parsedVersion.nextIncrementalVersion -q -DforceStdout`",
-            								returnStdout: true,
-          							)
-          							println("params.ModuleName value:" + params.ModuleName)
-          							if(params.ModuleName.trim().startsWith("shared")){
-          							    groupId = sh (
-                                        	script: "echo `mvn   -pl ${params.ModuleName}  help:evaluate -Dexpression=project.groupId -q -DforceStdout`",
-                                        	returnStdout: true,
-                                        )
-                                        artifactId = sh (
-                                        	script: "echo `mvn   -pl ${params.ModuleName}  help:evaluate -Dexpression=project.artifactId -q -DforceStdout`",
-                                        	returnStdout: true,
-                                        )
-
-          							}else{
-          							    groupId = sh (
-                                        	script: "echo `mvn   -pl ${params.ModuleName}/airflow  help:evaluate -Dexpression=project.groupId -q -DforceStdout`",
-                                        	returnStdout: true,
-                                        )
-                                        artifactId = sh (
-                                        	script: "echo `mvn   -pl ${params.ModuleName}/airflow  help:evaluate -Dexpression=project.artifactId -q -DforceStdout`",
-                                        	returnStdout: true,
-                                        )
-          							}
-                            		releaseVersion = "${majorVersion.trim()}.${minorVersion.trim()}.${incrementalVersion.trim()}"
-
-          							releaseTag = "${params.ModuleName}-${releaseVersion}"
-
-
-          							developmentVersion = "${majorVersion.trim()}.${minorVersion.trim()}.${nextIncrementalVersion.trim()}-SNAPSHOT"
-
-                                    artifactPath = groupId.trim().replaceAll('\\.', '/')
-
-          							println "${releaseVersion} ${releaseTag} ${developmentVersion} ${artifactPath} ${artifactId}"
-
-
-          							sshagent(['github_credentials']) {
-                                        sh """
-                                            git config --global user.email "rajasetti.harishkumar@gmail.com"
-                                            git config --global user.name "H@ri0705"
-                                        """
-                                    }
-          							if ( params.HotfixBranch?.trim().length() == 0 ) {
-
-              							sshagent(['github_credentials']) {
-                                 			sh "mvn  -B release:prepare -Dtag=${releaseTag}  -Darguments='-Dlocal=true -Dpr-build=true' -DupdateDependencie=true"
-                                 		}
-                                 		checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "https://github.com/harishkumarr1910/app-test.git", credentialsId: "github_credentials"]], branches: [[name: "${releaseTag}"]]],poll: false
-
-                                    }
-
-                             		sshagent(['github_credentials']) {
-                                        if(params.ModuleName.trim().startsWith("shared")){
-                                            sh "gcloud auth configure-docker"
-                                            println (" Push Image to Prod: mvn -Ddockerfile.repo=gcr.io/dev-env-251011/${artifactId.trim()} -pl ${params.ModuleName.trim()}  -am deploy")
-                                            sh "mvn -Ddockerfile.repo=gcr.io/dev-env-251011/${artifactId.trim()} -pl ${params.ModuleName.trim()}  -am deploy"
-                                            println (" Push Image to Prod: mvn -Ddockerfile.repo=gcr.io/dev-env-251011/${artifactId.trim()} -pl ${params.ModuleName.trim()}  -am deploy")
-                                            sh "mvn -Ddockerfile.repo=gcr.io/dev-env-251011/${artifactId.trim()} -pl ${params.ModuleName.trim()}  -am deploy"
-                                        }else{
-                             			    sh "mvn -pl ${params.ModuleName}/airflow  -am deploy"
-                                        }
-
-
-
-                             		}
-
-                             }
-                        }
-                    }
-                    }
-
-                }
-        stage ('Move to Production') {
-                    when{
-                        expression { return ! params.ModuleName.startsWith("shared")}
-                    }
-
-                	input {
-                        message "Move to Production Composer?"
-                        parameters {
-                            string(name: 'ReleaseBy',  description: 'Name of person issue the release.')
-                        }
-                    }
-                	steps {
-
-
-
-                		 withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
-                            sh "gcloud auth activate-service-account --key-file=${GOOGLE_APP_CREDENTIALS}"
-                            sh "gcloud config set project dev-env"
-                            sh "gcloud -q components update --version 218.0.0"
-
-                            sh "gsutil cp gs://maven-repo/release/${artifactPath.trim()}/${artifactId.trim()}/${releaseVersion}/${artifactId.trim()}-${releaseVersion.trim()}-dags.zip ${artifactId.trim()}-${releaseVersion.trim()}-dags.zip"
-                            sh "unzip ${artifactId.trim()}-${releaseVersion}-dags.zip -d ${artifactId.trim()}-${releaseVersion.trim()}-dags"
-                            sh "gcloud composer environments storage dags import --project dev-env-251011 --location us-east1 --environment worker-env --source ${artifactId.trim()}-${releaseVersion.trim()}-dags/*"
-        				}
-
-                	}
-                }
-
+      }
     }
+  }
 }
