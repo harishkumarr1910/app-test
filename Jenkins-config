@@ -6,7 +6,7 @@ pipeline {
 	tools {
         maven 'mvn3'
         jdk 'JDK8'
-	gcloud 'gcloud'
+	gcloud 'G_SDK'
     }
 	environment {
             def majorVersion = ""
@@ -29,6 +29,7 @@ pipeline {
                 sh '''
                     echo "PATH = ${PATH}"
                     echo "M2_HOME = ${M2_HOME}"
+		   
                 '''
             }
         }
