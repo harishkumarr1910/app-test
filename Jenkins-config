@@ -45,7 +45,7 @@ pipeline {
                     	configFileProvider([configFile(fileId: 'd891379d-3a32-4181-bea0-2f8a6a50079e', variable: 'MAVEN_SETTINGS')]) {
 
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
-                         sh "apt-get install python3"
+                         sh "sudo apt-get install python3"
 			  sh "python3 --version"
 			 sh """
                                                 				echo "deploy stage";
