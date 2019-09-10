@@ -6,7 +6,6 @@ pipeline {
 	tools {
         maven 'mvn3'
         jdk 'JDK8'
-	gcl 'G_SDK'
     }
 	environment {
             def majorVersion = ""
