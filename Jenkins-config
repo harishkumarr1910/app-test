@@ -50,7 +50,7 @@ pipeline {
                       
 		
                             
-			    gcloud auth activate-service-account --key-file ${GOOGLE_APP_CREDENTIALS};
+			    sh "gcloud auth activate-service-account --key-file ${GOOGLE_APP_CREDENTIALS}"
 			    sh "gcloud config set project dev-env-251011"
                             echo "After authentication gcloud";
                             sh "gcloud -q components update --version 230.0.0"
