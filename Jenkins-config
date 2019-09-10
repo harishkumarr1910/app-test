@@ -1,6 +1,25 @@
 pipeline {
-    agent{ 
-    	label 'jenkins-slave'
+   agent {
+    kubernetes {
+      //cloud 'kubernetes'
+      label 'mypod'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:1.11
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: dockersock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: dockersock
+    hostPath:
+      path: /var/run/docker.sock
+"""
     }
     options {
         skipStagesAfterUnstable()
@@ -26,7 +45,20 @@ pipeline {
             GOOGLE_APP_CREDENTIALS = credentials('GOOGLE_APP_CREDENTIALS');
     }
     stages {
-		stage ('Environment-Setup') {
+		stage('Build Docker image') {
+      steps {
+        git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
+        container('docker') {
+          script {
+            def image = docker.build('jenkins/jnlp-slave')
+            image.inside() {
+              sh "whoami"
+            }
+          }
+        }
+	}
+}
+stage ('Environment-Setup') {
             steps {
                 sh '''
                     echo "PATH = ${PATH}"
