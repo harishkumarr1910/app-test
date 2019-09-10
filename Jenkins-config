@@ -6,6 +6,7 @@ pipeline {
 	tools {
         maven 'mvn3'
         jdk 'JDK8'
+	python 'CPython-3.6'
     }
 	environment {
             def majorVersion = ""
