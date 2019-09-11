@@ -47,7 +47,7 @@ stage ('Environment-Setup') {
                                    credentialsId: 'github_credentials',
                                    url: 'https://github.com/harishkumarr1910/app-test.git'
 
-                    	configFileProvider([configFile(fileId: 'd891379d-3a32-4181-bea0-2f8a6a50079e', variable: 'MAVEN_SETTINGS')]) {
+                    	configFileProvider([configFile(fileId: '8056ccd9-9dfb-46d4-8137-b7ec0bab95ea', variable: 'MAVEN_SETTINGS')]) {
 
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
                       
