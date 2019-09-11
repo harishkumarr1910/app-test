@@ -26,19 +26,7 @@ pipeline {
             GOOGLE_APP_CREDENTIALS = credentials('GOOGLE_APP_CREDENTIALS');
     }
     stages {
-		stage('Build Docker image') {
-      steps {
-        git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
-        container('docker') {
-          script {
-            def image = docker.build('jenkins/jnlp-slave')
-            image.inside() {
-              sh "whoami"
-            }
-          }
-        }
-	}
-}
+		
 stage ('Environment-Setup') {
             steps {
                 sh '''
