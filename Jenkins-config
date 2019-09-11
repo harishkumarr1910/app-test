@@ -52,10 +52,6 @@ stage ('Environment-Setup') {
                         withCredentials([file(credentialsId: 'GOOGLE_APP_CREDENTIALS', variable: 'GOOGLE_APP_CREDENTIALS')]) {
                       
 		
-                            
-			     sh echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55"
-			    sh echo gcloud -v
-
                              script {
                                     if(params.HotfixBranch?.trim().length() > 0 ){
                                         println("==== HOTFIX ====")
