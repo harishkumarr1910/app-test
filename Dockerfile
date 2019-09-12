@@ -9,3 +9,5 @@ RUN pip install --upgrade pip \
         && pip install utils \
         && pip install virtualenv \
         && pip install apache-beam 
+FROM maven
+RUN maven -v
