@@ -54,7 +54,7 @@
         <composer.gcp.location>us-central1</composer.gcp.location>
 
 
-        <beam.version>2.13.0</beam.version>
+        <beam.version>2.20.0</beam.version>
         <lombok.version>1.18.0</lombok.version>
         <commons.math.version>3.6.1</commons.math.version>
         <common.beanutils>1.9.3</common.beanutils>
